@@ -26,10 +26,6 @@ repositories {
     mavenCentral()
 }
 
-checkScoverage {
-    minimumRate = 0.9
-}
-
 sourceSets {
     main {
         scala.srcDirs = ['src/main/scala']
