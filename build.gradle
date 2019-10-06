@@ -1,0 +1,69 @@
+group 'illesguy'
+version '1.0'
+
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "gradle.plugin.org.scoverage:gradle-scoverage:3.2.0"
+    }
+}
+
+apply plugin: 'scala'
+apply plugin: 'idea'
+apply plugin: 'org.scoverage'
+apply plugin: 'application'
+
+sourceCompatibility = 1.11
+libsDirName = 'lib'
+project.ext.scalaVersion = '2.13.0'
+
+repositories {
+    mavenCentral()
+}
+
+scoverage {
+    minimumRate = 0.9
+}
+
+sourceSets {
+    main {
+        scala.srcDirs = ['src/main/scala']
+        resources.srcDirs = ['src/main/resources']
+    }
+    test {
+        scala.srcDirs = ['src/test/scala']
+        resources.srcDirs = ['src/test/resources']
+    }
+}
+
+startScripts {
+    outputDir = file('build/bin')
+    applicationName = 'CronParser'
+    mainClassName = 'com.illesguy.cronparser.main.Main'
+}
+
+task copyToLib(type: Copy) {
+    into "$buildDir/lib"
+    from configurations.runtime
+}
+
+dependencies {
+    compile group: 'org.scala-lang', name: 'scala-library', version: project.ext.scalaVersion
+    compile group: 'org.scala-lang', name: 'scala-reflect', version: project.ext.scalaVersion
+    compile group: 'org.scala-lang', name: 'scala-compiler', version: project.ext.scalaVersion
+    compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.6.1'
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile group: 'org.mockito', name: 'mockito-all', version: '1.8.4'
+    testCompile group: 'org.scalatest', name: 'scalatest_2.13', version: '3.0.8'
+
+    scoverage group: 'org.scoverage', name: 'scalac-scoverage-plugin_2.13', version: '1.4.0'
+    scoverage group: 'org.scoverage', name: 'scalac-scoverage-runtime_2.13', version: '1.4.0'
+}
+
+test.finalizedBy copyToLib
