@@ -1,5 +1,6 @@
 package com.illesguy.cronparser.parser
 
+import scala.annotation.tailrec
 import scala.util.Try
 
 object CronStringParser {
@@ -32,6 +33,7 @@ object CronStringParser {
        |command         $command""".stripMargin
   }
 
+  @tailrec
   private def getValuesForPattern(possibleValues: Seq[Int], pattern: String): String = {
     if (pattern.contains("/")) {
       val parts = pattern.split("/")
@@ -53,8 +55,11 @@ object CronStringParser {
       val top = borders.last.toInt
       possibleValues.filter(v => bottom <= v && v <= top).mkString(" ")
 
-    } else {
+    } else if (possibleValues.contains(pattern.toInt)) {
       pattern
+
+    } else {
+      throw new IllegalArgumentException(s"Invalid pattern $pattern")
     }
   }
 }

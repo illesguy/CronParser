@@ -19,6 +19,15 @@ class ParserTest extends FlatSpec with Matchers with MockitoSugar {
     resultException.getMessage should be ("Cron string needs 6 parts, 5 fields and a command!")
   }
 
+  it should "return a failure if cron string has an invalid pattern" in {
+    val result = CronStringParser.parseCronString("* * * 13 * command")
+
+    result.isFailure should be (true)
+    val resultException = result.failed.get
+    resultException.getClass.getName should be ("java.lang.IllegalArgumentException")
+    resultException.getMessage should be ("Invalid pattern 13")
+  }
+
   it should "return a correctly formatted string for a correct cron string input" in {
     val expectedResult =
       """minute          0
