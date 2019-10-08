@@ -34,32 +34,25 @@ object CronStringParser {
   }
 
   @tailrec
-  private def getValuesForPattern(possibleValues: Seq[Int], pattern: String): String = {
-    if (pattern.contains("/")) {
-      val parts = pattern.split("/")
-      val stepSize = parts.last.toInt
-      val newPossibleValues = possibleValues.filter(_ % stepSize == 0)
-      val newPattern = parts.head
+  private def getValuesForPattern(possibleValues: Seq[Int], pattern: String): String = pattern match {
+    case s"$newPattern/$stepSize" =>
+      val step = stepSize.toInt
+      val newPossibleValues = possibleValues.filter(_ % step == 0)
       getValuesForPattern(newPossibleValues, newPattern)
 
-    } else if (pattern == "*") {
-      possibleValues.mkString(" ")
+    case s"$lower-$upper" =>
+      val lowerBound = lower.toInt
+      val upperBound = upper.toInt
+      possibleValues.filter(v => lowerBound <= v && v <= upperBound).mkString(" ")
 
-    } else if (pattern.contains(",")) {
-      val requiredValues = pattern.split(",").map(_.toInt)
-      possibleValues.filter(requiredValues.contains).mkString(" ")
+    case p if p.contains(",") =>
+      val selectedValues = p.split(",").map(_.toInt)
+      possibleValues.filter(selectedValues.contains).mkString(" ")
 
-    } else if (pattern.contains("-")) {
-      val borders = pattern.split("-")
-      val bottom = borders.head.toInt
-      val top = borders.last.toInt
-      possibleValues.filter(v => bottom <= v && v <= top).mkString(" ")
+    case "*" => possibleValues.mkString(" ")
 
-    } else if (possibleValues.contains(pattern.toInt)) {
-      pattern
+    case p if possibleValues.contains(p.toInt) => p
 
-    } else {
-      throw new IllegalArgumentException(s"Invalid pattern $pattern")
-    }
+    case _ => throw new IllegalArgumentException(s"Invalid pattern $pattern")
   }
 }
